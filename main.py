@@ -25,10 +25,10 @@ def process_text(value):
     new_value = ""
     for word in value.split():
         if len(word) == 1:
-            new_value += ' ' + word + '&nbsp;'
+            new_value += bcolors.FAIL + word + '\u00A0' + bcolors.ENDC
         else:
-            new_value += ' ' + word
-    return new_value.replace('&nbsp; ', '&nbsp;').strip()
+            new_value += word + '\u00A0'
+    return new_value.strip('\u00A0')
 
 # Function to process a file, change sentences if needed and return the data and changed sentences
 def process_file(file_path):
@@ -51,26 +51,29 @@ def save_result(data, file_path):
     result_path = os.path.join('__output__', timestamp, file_path)
     os.makedirs(os.path.dirname(result_path), exist_ok=True)
 
-    with open(result_path, 'w') as file:
-        json.dump(data, file)
+def colorize_sentence(sentence):
+    words = sentence.split('\u00A0')
+    for i in range(len(words)):
+        if '\u00A0' in words[i]:
+            if i > 0:
+                words[i-1] = bcolors.FAIL + words[i-1] + bcolors.ENDC
+            if i < len(words) - 1:
+                words[i+1] = bcolors.FAIL + words[i+1] + bcolors.ENDC
+    colored_sentence = '\u00A0'.join(words)
+    return colored_sentence.replace("%nonewline%", "\u00A0")
 
 # Główna funkcja do przetwarzania każdego znalezionego pliku, drukowania zmienionych zdań i zapisywania wyniku
 def main(path='.'):
     for file_path in find_files(path):
-        print("=" * (len("In file: " + file_path)))
-        print(bcolors.WARNING + "In file: " + file_path + bcolors.ENDC)
-        print("=" * (len("In file: " + file_path)))
+        print("=" * (len("W pliku: " + file_path)))
+        print(bcolors.WARNING + "W pliku: " + file_path + bcolors.ENDC)
+        print("=" * (len("W pliku: " + file_path)))
         data, changed_sentences = process_file(file_path)
         for sentence in changed_sentences:
-            colored_sentence = sentence.replace('&nbsp;', bcolors.OKGREEN + '&nbsp;' + bcolors.ENDC)
+            colored_sentence = colorize_sentence(sentence)
             print(colored_sentence)
         save_result(data, file_path)
 
 # If the script is run directly, call the main function
 if __name__ == '__main__':
     main()
-
-
-
-
-
