@@ -50,6 +50,8 @@ def save_result(data, file_path):
     timestamp = datetime.now().strftime('%Y%m%d_%H%M')
     result_path = os.path.join('__output__', timestamp, file_path)
     os.makedirs(os.path.dirname(result_path), exist_ok=True)
+    with open(result_path, 'w') as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
 
 def colorize_sentence(sentence):
     words = sentence.split('\u00A0')
@@ -60,7 +62,7 @@ def colorize_sentence(sentence):
             if i < len(words) - 1:
                 words[i+1] = bcolors.FAIL + words[i+1] + bcolors.ENDC
     colored_sentence = '\u00A0'.join(words)
-    return colored_sentence.replace("%nonewline%", "\u00A0")
+    return colored_sentence
 
 # Główna funkcja do przetwarzania każdego znalezionego pliku, drukowania zmienionych zdań i zapisywania wyniku
 def main(path='.'):
@@ -69,10 +71,11 @@ def main(path='.'):
         print(bcolors.WARNING + "W pliku: " + file_path + bcolors.ENDC)
         print("=" * (len("W pliku: " + file_path)))
         data, changed_sentences = process_file(file_path)
+        save_result(data, file_path)
         for sentence in changed_sentences:
             colored_sentence = colorize_sentence(sentence)
             print(colored_sentence)
-        save_result(data, file_path)
+        
 
 # If the script is run directly, call the main function
 if __name__ == '__main__':
