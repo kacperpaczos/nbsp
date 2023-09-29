@@ -25,10 +25,13 @@ def process_text(value):
     new_value = ""
     for word in value.split():
         if len(word) == 1:
-            new_value += bcolors.FAIL + word + '\u00A0' + bcolors.ENDC
-        else:
             new_value += word + '\u00A0'
-    return new_value.strip('\u00A0')
+            print(bcolors.FAIL + word + '\u00A0' + bcolors.ENDC, end ="")
+        else:
+            new_value += word + ' '
+            print(word, end =" ")
+    print()
+    return new_value.strip()
 
 # Function to process a file, change sentences if needed and return the data and changed sentences
 def process_file(file_path):
@@ -53,17 +56,6 @@ def save_result(data, file_path):
     with open(result_path, 'w') as file:
         json.dump(data, file, ensure_ascii=False, indent=4)
 
-def colorize_sentence(sentence):
-    words = sentence.split('\u00A0')
-    for i in range(len(words)):
-        if '\u00A0' in words[i]:
-            if i > 0:
-                words[i-1] = bcolors.FAIL + words[i-1] + bcolors.ENDC
-            if i < len(words) - 1:
-                words[i+1] = bcolors.FAIL + words[i+1] + bcolors.ENDC
-    colored_sentence = '\u00A0'.join(words)
-    return colored_sentence
-
 # Główna funkcja do przetwarzania każdego znalezionego pliku, drukowania zmienionych zdań i zapisywania wyniku
 def main(path='.'):
     for file_path in find_files(path):
@@ -72,9 +64,6 @@ def main(path='.'):
         print("=" * (len("W pliku: " + file_path)))
         data, changed_sentences = process_file(file_path)
         save_result(data, file_path)
-        for sentence in changed_sentences:
-            colored_sentence = colorize_sentence(sentence)
-            print(colored_sentence)
         
 
 # If the script is run directly, call the main function
